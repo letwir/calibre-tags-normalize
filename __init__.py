@@ -1,60 +1,48 @@
-from calibre.gui2.actions import InterfaceAction
+from calibre.customize import InterfaceActionBase
 from calibre.gui2 import info_dialog
 import unicodedata
 
-def normalize(s):
-    if not s:
-        return s
-    s = unicodedata.normalize('NFKC', s)
-    s = s.replace('\u3000', ' ')
-    return s
-
-
-class NormalizeTitleSeries(InterfaceAction):
-
-    name = 'Normalize Title/Series'
-    action_spec = (
-        'Normalize Title/Series',
-        None,
-        'Convert full-width digits/spaces to half-width in title and series',
-        None
-    )
+class NormalizeTitleSeries(InterfaceActionBase):
+    name = 'Normalize Title / Series'
 
     def genesis(self):
+        self.qaction.setText(self.name)
         self.qaction.triggered.connect(self.run)
 
     def run(self):
-        db = self.gui.current_db
+        db = self.gui.current_db.new_api
         view = self.gui.library_view
 
         rows = view.selectionModel().selectedRows()
         if not rows:
-            info_dialog(self.gui, 'Normalize',
-                        'No books selected', show=True)
+            info_dialog(self.gui, 'Normalize', 'No books selected', show=True)
             return
+
+        def norm(s):
+            if not s:
+                return s
+            return unicodedata.normalize('NFKC', s).replace('\u3000', ' ')
 
         book_ids = [view.model().id(row) for row in rows]
 
-        changed = 0
-        for book_id in book_ids:
-            mi = db.get_metadata(book_id, index_is_id=True)
+        with db.transaction():
+            for book_id in book_ids:
+                mi = db.get_metadata(book_id)
+                mi.title = norm(mi.title)
+                mi.series = norm(mi.series)
+                db.set_metadata(
+                    book_id,
+                    mi,
+                    set_title=True,
+                    set_series=True
+                )
 
-            new_title = normalize(mi.title)
-            new_series = normalize(mi.series)
-
-            if new_title != mi.title or new_series != mi.series:
-                mi.title = new_title
-                mi.series = new_series
-                db.set_metadata(book_id, mi)
-                changed += 1
+        # ★ これが無いと画面が更新されない
+        view.model().refresh_ids(book_ids)
 
         info_dialog(
             self.gui,
             'Normalize',
-            f'Updated {changed} book(s)',
+            f'Updated {len(book_ids)} book(s)',
             show=True
         )
-
-
-# ★★★ これが無いと絶対に認識されない ★★★
-plugin_class = NormalizeTitleSeries
