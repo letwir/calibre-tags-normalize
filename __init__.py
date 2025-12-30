@@ -1,17 +1,6 @@
-#!python3
-# やること。
-# * {title},{series}の全角数字、スペースを半角にする
-# * 
-# TODO
-# * 以上をGUIでポチポチON/OFFできるようにする
-# * 書籍データを各EPUB、CBZに反映できるようにする
-__name__        = 'Normalize Title/Series'
-__version__     = (0, 0, 1)
-__license__   = 'CC0'
-__copyright__ = '2025, letwir'
-
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2 import info_dialog
+from calibre.utils.config import JSONConfig
 import unicodedata
 
 def normalize(s):
@@ -20,6 +9,7 @@ def normalize(s):
     s = unicodedata.normalize('NFKC', s)
     s = s.replace('\u3000', ' ')
     return s
+
 
 class NormalizeTitleSeries(InterfaceAction):
 
