@@ -19,7 +19,7 @@ REMAP = {
     '∼': '～',
     '〜': '～',
 }
-RE_COLON_SPACE = re.compile(r'\s*:\s*') # コロン前後のスペース統一
+RE_COLON_SPACE = re.compile(r'\s*(:|：)\s*') # コロン前後のスペース統一
 #RE_ROMAN = re.compile(
 #    r'(Vol\.?|Volume|Season|第|＞)'
 #    r'(L?X{0,3})'
