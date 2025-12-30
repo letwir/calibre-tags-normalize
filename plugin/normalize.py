@@ -3,17 +3,12 @@
 from typing import Optional
 import unicodedata
 
-# 全角数字 + 全角スペース → 半角
-FW_MAP = str.maketrans(
-    "０１２３４５６７８９　",
-    "0123456789 "
-)
-
 def normalize_text(s: Optional[str]) -> Optional[str]:
     if not s:
         return s
     return unicodedata.normalize('NFKC', s)
 
+# ----- メイン関数 -----
 def normalize_selection_via_gui(gui):
     db = gui.current_db
     view = gui.library_view
