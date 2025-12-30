@@ -76,7 +76,7 @@ class Normalize(InterfaceAction):
             from .normalize import normalize_main
             print('…正規化関数実行中')
             result_normalize = normalize_main(self.gui)
-            print(f'✔為された。\n{result_normalize.changed}/{result_normalize.processed}\n-----')
+            print(f'✔正規化は為された。\n{result_normalize.changed}/{result_normalize.processed}\n-----')
         except Exception as e:
             # Always print exception to stdout for debugging when running
             # calibre-debug so we can see what occurred.

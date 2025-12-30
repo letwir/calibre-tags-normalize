@@ -13,13 +13,29 @@ class Result:
 
 # ------------------------------------------- 文字一覧 -----
 # 文字列変換 - 規則
-RE_SYMBOLS = re.compile(r'[~∼〜]') # ユーザーご要望の変換対象記号(１文字用)
+RE_SYMBOLS = re.compile(r'([~∼〜]|\.{3})') # ユーザーご要望の変換対象記号(１文字用)
 REMAP = {
     '~': '～',
     '∼': '～',
     '〜': '～',
+    '...': '…',
 }
 RE_COLON_SPACE = re.compile(r'\s*(:|：)\s*') # コロン前後のスペース統一
+
+VOLUME_RULES = [
+    (
+        re.compile(r'＞\s*(\d+)$'),
+        r'＞ \1巻'
+    ),    # ＞6 → ＞ 6巻
+    (
+        re.compile(r'\((\d+)巻*\)$'),
+        r' \1巻'
+    ),    # (6) →  6巻
+    (
+        re.compile(r':\s*(\d+)巻*$'),
+        r' \1巻'
+    ),    # : 6 →  6巻
+]
 #RE_ROMAN = re.compile(
 #    r'(Vol\.?|Volume|Season|第|＞)'
 #    r'(L?X{0,3})'
@@ -72,9 +88,12 @@ def convert_text(s: Optional[str]) -> Optional[str]:
     s = s.translate(RE_FORBIDDEN)    # 禁止文字
     if s.upper() in RE_WINDOWS_RESERVED_MAP:
         s = f'_{s}'    # Windows予約名
-    # ユーザーの変換ルール
+    ## ユーザーの変換ルール
     s = RE_SYMBOLS.sub(lambda m: REMAP[m.group(0)], s) #１文字変換用
     s = RE_COLON_SPACE.sub(': ', s) # コロン前後のスペース統一
+    for regex, repl in VOLUME_RULES:
+        if regex.search(s):
+            s = regex.sub(repl, s)   # 巻数ルール適用
     return s
 
 
@@ -121,7 +140,7 @@ def normalize_main(gui) -> Result:
             print(f'''-----
                 normalized.
                 ID: {book_id}
-                \tTITLE: {old_title}
+                \t TITLE: {old_title}
                 \t->\t{new_title}
                 \tSERIES: {old_series}
                 \t->\t{new_series}
