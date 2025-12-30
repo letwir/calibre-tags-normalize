@@ -1,48 +1,71 @@
-from calibre.customize import InterfaceActionBase
-from calibre.gui2 import info_dialog
-import unicodedata
+# -*- coding: utf-8 -*-
 
-class NormalizeTitleSeries(InterfaceActionBase):
+from calibre.customize import InterfaceActionBase
+from calibre.gui2 import error_dialog, info_dialog
+
+# ---- 変換テーブル ----
+# 全角数字 → 半角数字
+ZEN2HAN = str.maketrans(
+    "０１２３４５６７８９　",
+    "0123456789 "
+)
+
+def normalize_text(s: str) -> str:
+    if not s:
+        return s
+    return s.translate(ZEN2HAN)
+
+# ---- UI プラグイン本体 ----
+class NormalizeTitleSeries(InterfaceAction):
+
     name = 'Normalize Title / Series'
+    description = '全角数字・スペースを半角に正規化'
+    author = 'Akito Yoshitake'
+    version = (1, 0, 0)
+    minimum_calibre_version = (5, 0, 0)
 
     def genesis(self):
-        self.qaction.setText(self.name)
+        # メニュー追加
+        self.qaction.setText('Normalize Title / Series')
         self.qaction.triggered.connect(self.run)
 
     def run(self):
-        db = self.gui.current_db.new_api
+        db = self.gui.current_db
         view = self.gui.library_view
 
-        rows = view.selectionModel().selectedRows()
-        if not rows:
-            info_dialog(self.gui, 'Normalize', 'No books selected', show=True)
+        # 選択されている book_id を取得
+        book_ids = view.get_selected_ids()
+
+        if not book_ids:
+            error_dialog(
+                self.gui,
+                'No selection',
+                '本が選択されていません',
+                show=True
+            )
             return
 
-        def norm(s):
-            if not s:
-                return s
-            return unicodedata.normalize('NFKC', s).replace('\u3000', ' ')
+        changed = 0
 
-        book_ids = [view.model().id(row) for row in rows]
+        for book_id in book_ids:
+            mi = db.get_metadata(book_id, index_is_id=True)
 
-        with db.transaction():
-            for book_id in book_ids:
-                mi = db.get_metadata(book_id)
-                mi.title = norm(mi.title)
-                mi.series = norm(mi.series)
-                db.set_metadata(
-                    book_id,
-                    mi,
-                    set_title=True,
-                    set_series=True
-                )
+            new_title = normalize_text(mi.title)
+            new_series = normalize_text(mi.series)
 
-        # ★ これが無いと画面が更新されない
-        view.model().refresh_ids(book_ids)
+            if new_title != mi.title:
+                mi.title = new_title
+                changed += 1
+
+            if new_series != mi.series:
+                mi.series = new_series
+                changed += 1
+
+            db.set_metadata(book_id, mi, set_title=True, set_series=True)
 
         info_dialog(
             self.gui,
-            'Normalize',
-            f'Updated {len(book_ids)} book(s)',
+            'Done',
+            f'{len(book_ids)}冊処理しました\n変更フィールド数: {changed}',
             show=True
         )
