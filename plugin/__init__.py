@@ -11,30 +11,39 @@ from calibre.gui2.actions import InterfaceAction
 
 # ---- プラグイン本体の説明 ----
 class NormalizeBase(InterfaceActionBase):
-    name = 'Normalize Fullwidth Numbers'
-    description = 'Normalize fullwidth digits and fullwidth spaces in title/series for selected books'
+    name = 'Normalize Fullwidth'
+    description = '''
+    Normalize fullwidth digit, number, space and etc...
+    in title/series for selected books
+    '''
     author = 'letwir, ChatGPT-5'
     version = (1, 0, 2)
     action_spec = (
-        'Normalize fullwidth numbers',
+        'Normalize Fullwidth for Title/Series',
         None,
-        'Normalize fullwidth digits and fullwidth spaces to halfwidth in Title/Series',
+        'Normalize Fullwidth for Title/Series',
         None
         )
-
     def load_actual_plugin(self, gui):
         return Normalize(gui, self.site_customization)
 
 class Normalize(InterfaceAction):
-    name = 'Normalize fullwidth numbers'
-
-    # Make this a 'current' action so it acts on the current selection/view
+    name = 'Normalize fullwidth'
+    # current: GUIで選択した本に対して動作
     action_type = 'current'
 
+    # ----- ✨️ここがGUIの可視化部分✨️ -----
     def genesis(self):
-        # self.qaction is created automatically from action_spec in the base class
         try:
-            self.qaction.triggered.connect(self.run_on_selection)
+            # 正規化アクション
+            self.qaction.setText('Normalization/正規化')
+            self.qaction.triggered.connect(self.func_normalize)
+        except Exception:
+            pass
+
+        try:
+            self.qaction.setText('Fetch Amazon metaTag/Amazonメタ情報取得')
+            self.qaction.triggered.connect(self.func_amazon)
         except Exception:
             pass
 
@@ -54,24 +63,24 @@ class Normalize(InterfaceAction):
                 self.gui.library_view.menu(),
                 'normalize_fullwidth_numbers_context',
                 'Normalize fullwidth numbers',
-                triggered=self.run_on_selection
+                triggered=self.func_normalize
                 )
         except Exception:
             # Fallback: some calibre versions expose different menu APIs
             pass
 
-    def run_on_selection(self):
+    def func_normalize(self):
         # Call the helper that implements normalization logic.
-        print('Normalize action triggered\n🚀正規化アクションがトリガーされました')
+        print('Normalize action triggered\n🚀正規化がトリガーされた')
         try:
-            from .normalize import normalize_selection_via_gui
-            print('Calling normalize_selection_via_gui...\n関数実行中')
-            normalize_selection_via_gui(self.gui)
-            print('normalize_selection_via_gui returned\n✔為された。')
+            from .normalize import normalize_main
+            print('…正規化関数実行中')
+            result_normalize = normalize_main(self.gui)
+            print(f'✔為された。\n{result_normalize.changed}/{result_normalize.processed}\n-----')
         except Exception as e:
             # Always print exception to stdout for debugging when running
             # calibre-debug so we can see what occurred.
-            print('Normalize action exception\n❌️例外発生！:', repr(e))
+            print('Normalize Exception\n❌️例外発生！:\n', repr(e))
             try:
                 from calibre.gui2 import error_dialog
                 error_dialog(self.gui, 'Normalize Error', str(e))
