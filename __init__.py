@@ -1,6 +1,5 @@
 from calibre.gui2.actions import InterfaceAction
 from calibre.gui2 import info_dialog
-from calibre.utils.config import JSONConfig
 import unicodedata
 
 def normalize(s):
@@ -37,7 +36,6 @@ class NormalizeTitleSeries(InterfaceAction):
         book_ids = [view.model().id(row) for row in rows]
 
         changed = 0
-
         for book_id in book_ids:
             mi = db.get_metadata(book_id, index_is_id=True)
 
@@ -56,3 +54,7 @@ class NormalizeTitleSeries(InterfaceAction):
             f'Updated {changed} book(s)',
             show=True
         )
+
+
+# ★★★ これが無いと絶対に認識されない ★★★
+plugin_class = NormalizeTitleSeries
