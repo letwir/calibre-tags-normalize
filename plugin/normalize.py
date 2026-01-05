@@ -118,8 +118,13 @@ def normalize_main(gui) -> Result:
 
         # 処理
         old_title = mi.title
+        old_authors = mi.authors
         old_series = mi.series
         new_title = convert_text(mi.title)
+        new_authors = []
+        for author in mi.authors:
+            new_authors.append(convert_text(author))
+        new_authors = list(new_authors)
         new_series = convert_text(mi.series)
 
         # 後処理：変更があった場合のみ保存
@@ -127,21 +132,32 @@ def normalize_main(gui) -> Result:
         if new_title != old_title:
             mi.title = new_title
             changed = True
+        if new_authors != old_authors:
+            mi.authors = new_authors
+            changed = True
         if new_series != old_series:
             mi.series = new_series
             changed = True
 
         if changed:
+            print(f'''-----
+                normalized.
+                ID: {book_id}''')
             db.set_metadata(
                 book_id,
                 mi,
                 set_title=True,
             )
-            print(f'''-----
-                normalized.
-                ID: {book_id}
+            if new_title != old_title:
+                print(f'''
                 \t TITLE: {old_title}
-                \t->\t{new_title}
+                \t->\t{new_title}''')
+            if new_authors != old_authors:
+                print(f'''
+                \t AUTHOR: {old_authors}
+                \t->\t{new_authors}''')
+            if new_series != old_series:
+                print(f'''
                 \tSERIES: {old_series}
                 \t->\t{new_series}
                 ''')

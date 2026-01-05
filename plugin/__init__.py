@@ -43,12 +43,12 @@ class Normalize(InterfaceAction):
             triggered=self.func_normalize
         )
 
-        self.amazon_action = self.create_menu_action(
-            menu,
-            'fetch_amazon_and_normalize',
-            'Amazonから取得して正規化',
-            triggered=self.func_amazon_fetch
-        )
+        # self.amazon_action = self.create_menu_action(
+        #     menu,
+        #     'fetch_amazon_and_normalize',
+        #     'Amazonから取得して正規化',
+        #     triggered=self.func_amazon_fetch
+        # )
         ## 選択状態に応じてアクションの有効/無効を切り替え
         self.gui.library_view.selectionModel().selectionChanged.connect(
             self.update_action_state
@@ -57,14 +57,14 @@ class Normalize(InterfaceAction):
     def update_action_state(self, *args):
         enabled = bool(self.gui.library_view.get_selected_ids())
         self.normalize_action.setEnabled(enabled)
-        self.amazon_action.setEnabled(enabled)
-    # def genesis(self):
-    #     try:
-    #         # 正規化アクション
-    #         self.qaction.setText('Normalization/正規化')
-    #         self.qaction.triggered.connect(self.func_normalize)
-    #     except Exception:
-    #         pass
+    #    self.amazon_action.setEnabled(enabled)
+    def genesis(self):
+        try:
+            # 正規化アクション
+            self.qaction.setText('Normalization/正規化')
+            self.qaction.triggered.connect(self.func_normalize)
+        except Exception:
+            pass
 
     # def location_selected(self, loc):
     #     # Enable the action only when the library view is active
@@ -84,12 +84,12 @@ class Normalize(InterfaceAction):
                 'Normalize fullwidth numbers',
                 triggered=self.func_normalize
                 )
-            self.create_menu_action(
-                self.gui.library_view.menu(),
-                'fetch_amazon',
-                'fetch Amazon metaTag',
-                triggered=self.func_amazon_fetch
-                )
+            # self.create_menu_action(
+            #     self.gui.library_view.menu(),
+            #     'fetch_amazon',
+            #     'fetch Amazon metaTag',
+            #     triggered=self.func_amazon_fetch
+            #     )
         except Exception:
             # Fallback: some calibre versions expose different menu APIs
             pass
