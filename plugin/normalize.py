@@ -4,6 +4,8 @@ import unicodedata  # 正規化モジュール
 import re           # 正規表現モジュール
 from dataclasses import dataclass   # 実行結果を返すやつ
 #-----
+__license__   = 'GPL v3'
+__copyright__ = '2025, letwir'
 @dataclass(frozen=True)
 class Result:
     '''実行結果データクラス'''
