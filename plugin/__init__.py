@@ -17,7 +17,7 @@ class NormalizeBase(InterfaceActionBase):
     in title/series for selected books
     '''
     author = 'letwir, ChatGPT-5'
-    version = (1, 2, 1)
+    version = (1, 3, 0)
     action_spec = (
         'Normalize Fullwidth for Title/Series',
         None,
