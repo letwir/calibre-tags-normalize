@@ -23,8 +23,8 @@ REMAP = {
     '...': '…',
 }
 RE_COLON_SPACE = re.compile(r'\s*(:|：)\s*') # コロン前後のスペース統一
-
-VOLUME_RULES = [
+# 2文字以上の変換ルールリスト
+RE_STR_RULES = [
     (
         re.compile(r'＞\s*(\d+)$'),
         r'＞ \1巻'
@@ -37,6 +37,14 @@ VOLUME_RULES = [
         re.compile(r':\s*(\d+)巻*$'),
         r' \1巻'
     ),    # : 6 →  6巻
+    (
+        re.compile(r'【.*?(電子特別版|付)き? ?\!?】'),
+        r''
+    ),    # 【特典付き!】など削除
+    (
+        re.compile(r'年(\d)月'),
+        r'年0\1月'
+    ),    # 年3月 → 年03月
 ]
 #RE_ROMAN = re.compile(
 #    r'(Vol\.?|Volume|Season|第|＞)'
@@ -93,9 +101,9 @@ def convert_text(s: Optional[str]) -> Optional[str]:
     ## ユーザーの変換ルール
     s = RE_SYMBOLS.sub(lambda m: REMAP[m.group(0)], s) #１文字変換用
     s = RE_COLON_SPACE.sub(': ', s) # コロン前後のスペース統一
-    for regex, repl in VOLUME_RULES:
+    for regex, repl in RE_STR_RULES:
         if regex.search(s):
-            s = regex.sub(repl, s)   # 巻数ルール適用
+            s = regex.sub(repl, s)   # 2文字以上のルール適用
     return s
 
 
