@@ -12,11 +12,11 @@ halfwidth spaces.
 Roman Number to ASCII (e.g. VIII).  
 
 ## e,g.)  
- * {title}: n -> {title} n巻  
- * {title}(n) -> {title} n巻  
- * ＜{title}＞n -> ＜{title}＞ n巻  
- * ~,～ -> ～  
- * 年3月 → 年03月  
+ * {title}: n	-> {title} n巻  
+ * {title}(n)	-> {title} n巻  
+ * ＜{title}＞n	-> ＜{title}＞ n巻  
+ * ~,～	-> ～  
+ * 年3月 -> 年03月  
  * del【◯◯特典付き!】, 【電子特別版】  
 and more...  
 
